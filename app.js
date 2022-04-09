@@ -1,6 +1,9 @@
 // // Тоглогчдын ээлжийг хадгалах хувьсагч. Нэгдүгээр тогчлогч - 0, хоёрдугаар тоглогч - 1
 var activePlayer;
 
+// Тоглоом дууссаныг шалгагч boolean хувьсагч
+var isGameOver;
+
 // // Тоглогчдын оноог цуглуулах хувьсагч
 var scores;
 
@@ -10,8 +13,11 @@ var roundScore;
 var diceDom = document.querySelector(".dice");
 
 newGame();
-
+////////////////////////////////////// Шинэ тоглоом эхлэх /////////////////////////////////////
 function newGame() {
+  //
+  isGameOver = false;
+
   // Тоглогчдын ээлжийг хадгалах хувьсагч. Нэгдүгээр тогчлогч - 0, хоёрдугаар тоглогч - 1
   activePlayer = 0;
 
@@ -44,10 +50,6 @@ function newGame() {
 
   document.querySelector(".player-0-panel").classList.add("active");
 
-  // ROLL болон HOLD button-уудыг гаргаж ирч байна
-  document.querySelector(".btn-hold").style.display = "block";
-  document.querySelector(".btn-roll").style.display = "block";
-
   // DICE-ийг алга болгож байна
   diceDom.style.display = "none";
 }
@@ -56,58 +58,62 @@ function newGame() {
 
 // Шоог шидэх үед зураг нь солигдоно. Бас оноо нэмэгдэнэ
 document.querySelector(".btn-roll").addEventListener("click", function () {
-  // 1 - 6 хүртэл санамсаргүй тоо олгож байна
-  var diceNumber = Math.floor(Math.random() * 6) + 1;
+  //Эхлээд тогоом дууссан үгүйг шалгана
+  if (isGameOver !== true) {
+    // 1 - 6 хүртэл санамсаргүй тоо олгож байна
+    var diceNumber = Math.floor(Math.random() * 6) + 1;
 
-  //Шооны зургийг гаргаж ирнэ
-  diceDom.style.display = "block";
+    //Шооны зургийг гаргаж ирнэ
+    diceDom.style.display = "block";
 
-  // Random-оор буусан тоонд таарсан шооны зургийг гаргаж ирнэ
-  diceDom.src = "dice-" + diceNumber + ".png";
+    // Random-оор буусан тоонд таарсан шооны зургийг гаргаж ирнэ
+    diceDom.src = "dice-" + diceNumber + ".png";
 
-  // Буусан тоо нь 1 ээс ялгаатай бол идэвхитэй тоглогчийн оноог нэмж өгнө
-  if (diceNumber !== 1) {
-    // Нэгээс ялгаатай тоо буулаа буусан тоог идэвхитэй тоглогч дээр нэмнэ
-    roundScore = roundScore + diceNumber;
+    // Буусан тоо нь 1 ээс ялгаатай бол идэвхитэй тоглогчийн оноог нэмж өгнө
+    if (diceNumber !== 1) {
+      // Нэгээс ялгаатай тоо буулаа буусан тоог идэвхитэй тоглогч дээр нэмнэ
+      roundScore = roundScore + diceNumber;
 
-    // Argument-ийн ID-аар дамжиж утгыг өгч байна
-    document.getElementById("current-" + activePlayer).textContent = roundScore;
-  }
+      // Argument-ийн ID-аар дамжиж утгыг өгч байна
+      document.getElementById("current-" + activePlayer).textContent =
+        roundScore;
+    }
 
-  // Нэгтэй тэнцүү буулаа идэвхитэй тоглогчийг солино
-  else {
-    nextPlayer();
+    // Нэгтэй тэнцүү буулаа идэвхитэй тоглогчийг солино
+    else {
+      nextPlayer();
+    }
   }
 });
 
 ////////////////////////////////////////////// Hold button дарагдах үед //////////////////////////////////////////////
 document.querySelector(".btn-hold").addEventListener("click", function () {
-  // Current Score-ыг идэвхитэй тоглогчийн онооруу нэмэх
-  scores[activePlayer] = scores[activePlayer] + roundScore;
+  //Эхлээд тогоом дууссан үгүйг шалгана
+  if (isGameOver !== true) {
+    // Current Score-ыг идэвхитэй тоглогчийн онооруу нэмэх
+    scores[activePlayer] = scores[activePlayer] + roundScore;
 
-  // Идэвхитэй тоглогчийн оноог харуулах
-  document.getElementById("score-" + activePlayer).textContent =
-    scores[activePlayer];
+    // Идэвхитэй тоглогчийн оноог харуулах
+    document.getElementById("score-" + activePlayer).textContent =
+      scores[activePlayer];
 
-  if (scores[activePlayer] >= 10) {
-    //Хожсон тоглогчийн нэрийг WINNER болгож байна
-    document.getElementById("name-" + activePlayer).textContent = "WINNER";
+    if (scores[activePlayer] >= 10) {
+      // Тоглоом дууссан
+      isGameOver = true;
 
-    // Хожсон тоглогчийн нэрийг CSS-ээс winner гэсэн class-тай холбож өгч байна
-    document
-      .querySelector(".player-" + activePlayer + "-panel")
-      .classList.add("winner");
+      //Хожсон тоглогчийн нэрийг WINNER болгож байна
+      document.getElementById("name-" + activePlayer).textContent = "WINNER";
 
-    // ROLL болон HOLD button-уудыг алга болгож байна
-    document.querySelector(".btn-hold").style.display = "none";
-    document.querySelector(".btn-roll").style.display = "none";
+      // Хожсон тоглогчийн нэрийг CSS-ээс winner гэсэн class-тай холбож өгч байна
+      document
+        .querySelector(".player-" + activePlayer + "-panel")
+        .classList.add("winner");
+    }
+    // Хэрвээ хэн нэг нь хожоогүй бол nextPlayer функцийг дуудсаар байх хэрэгтэй
+    else {
+      nextPlayer();
+    }
   }
-  // Хэрвээ хэн нэг нь хожоогүй бол nextPlayer функцийг дуудсаар байх хэрэгтэй
-  else {
-    nextPlayer();
-  }
-
-  //Дараачийн тоглогчруу шилжинэ
 });
 
 ////////////////////////////////////// Шинээр хэлэх //////////////////////////////////////////////
