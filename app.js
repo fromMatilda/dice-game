@@ -10,6 +10,9 @@ var scores;
 // // Ээлжийн оноог хадгалах хувьсагч
 var roundScore;
 
+// 100 дээш гарвал онооноос нь хасна.
+var minusScore;
+
 var diceDom = document.querySelector(".dice");
 
 newGame();
@@ -57,7 +60,83 @@ function newGame() {
 ////////////////////////////////////////////// Эхлэх үед //////////////////////////////////////////////
 
 // Шоог шидэх үед зураг нь солигдоно. Бас оноо нэмэгдэнэ
-document.querySelector(".btn-roll").addEventListener("click", function () {
+document.querySelector(".btn-roll").addEventListener("click", rollDice);
+
+////////////////////////////////////////////// Hold button дарагдах үед //////////////////////////////////////////////
+document.querySelector(".btn-hold").addEventListener("click", holdButton);
+
+//////////////////////////////////////////////// Keyboard-той холбосон //////////////////////////////////////////////
+document.addEventListener("keydown", (e) => {
+  if (e.key === "n") {
+    newGame();
+  }
+  if (e.key === "r") {
+    rollDice();
+  }
+  if (e.keyCode === 32) {
+    holdButton();
+  }
+});
+////////////////////////////////////// Шинээр хэлэх //////////////////////////////////////////////
+document.querySelector(".btn-new").addEventListener("click", newGame);
+
+function nextPlayer() {
+  // Шооны зургыг алга болгох
+  diceDom.style.display = "none";
+
+  // Нэг буусан тоглогчийн roundScore-ыг тэглэж байна
+  roundScore = 0;
+
+  // Нэг буусан тоглогчийн currentScore-ыг тэглэж байна
+  document.getElementById("current-" + activePlayer).textContent = 0;
+
+  // Идэвхитэй тоглогчийг сольж байна
+  activePlayer === 0 ? (activePlayer = 1) : (activePlayer = 0);
+
+  // Active Player-ын жижигхэн бөөрөнхийг шилжүүлэх
+  document.querySelector(".player-0-panel").classList.toggle("active");
+  document.querySelector(".player-1-panel").classList.toggle("active");
+}
+function holdButton() {
+  //Эхлээд тогоом дууссан үгүйг шалгана
+  if (isGameOver !== true) {
+    // Current Score-ыг идэвхитэй тоглогчийн онооруу нэмэх
+    scores[activePlayer] = scores[activePlayer] + roundScore;
+
+    // Идэвхитэй тоглогчийн оноог харуулах
+    document.getElementById("score-" + activePlayer).textContent =
+      scores[activePlayer];
+
+    if (scores[activePlayer] === 100) {
+      // Тоглоом дууссан
+      isGameOver = true;
+
+      //Хожсон тоглогчийн нэрийг WINNER болгож байна
+      document.getElementById("name-" + activePlayer).textContent = "WINNER";
+
+      // Хожсон тоглогчийн нэрийг CSS-ээс winner гэсэн class-тай холбож өгч байна
+      document
+        .querySelector(".player-" + activePlayer + "-panel")
+        .classList.add("winner");
+    }
+
+    // Хэрвээ хэн нэг нь хожоогүй бол nextPlayer функцийг дуудсаар байх хэрэгтэй
+
+    if (scores[activePlayer] > 100) {
+      minusScore = scores[activePlayer] - 100;
+
+      scores[activePlayer] = scores[activePlayer] - minusScore - roundScore;
+
+      document.getElementById("score-" + activePlayer).textContent =
+        scores[activePlayer];
+      nextPlayer();
+    } else {
+      nextPlayer();
+    }
+  }
+}
+
+function rollDice() {
   //Эхлээд тогоом дууссан үгүйг шалгана
   if (isGameOver !== true) {
     // 1 - 6 хүртэл санамсаргүй тоо олгож байна
@@ -84,55 +163,4 @@ document.querySelector(".btn-roll").addEventListener("click", function () {
       nextPlayer();
     }
   }
-});
-
-////////////////////////////////////////////// Hold button дарагдах үед //////////////////////////////////////////////
-document.querySelector(".btn-hold").addEventListener("click", function () {
-  //Эхлээд тогоом дууссан үгүйг шалгана
-  if (isGameOver !== true) {
-    // Current Score-ыг идэвхитэй тоглогчийн онооруу нэмэх
-    scores[activePlayer] = scores[activePlayer] + roundScore;
-
-    // Идэвхитэй тоглогчийн оноог харуулах
-    document.getElementById("score-" + activePlayer).textContent =
-      scores[activePlayer];
-
-    if (scores[activePlayer] >= 10) {
-      // Тоглоом дууссан
-      isGameOver = true;
-
-      //Хожсон тоглогчийн нэрийг WINNER болгож байна
-      document.getElementById("name-" + activePlayer).textContent = "WINNER";
-
-      // Хожсон тоглогчийн нэрийг CSS-ээс winner гэсэн class-тай холбож өгч байна
-      document
-        .querySelector(".player-" + activePlayer + "-panel")
-        .classList.add("winner");
-    }
-    // Хэрвээ хэн нэг нь хожоогүй бол nextPlayer функцийг дуудсаар байх хэрэгтэй
-    else {
-      nextPlayer();
-    }
-  }
-});
-
-////////////////////////////////////// Шинээр хэлэх //////////////////////////////////////////////
-document.querySelector(".btn-new").addEventListener("click", newGame);
-
-function nextPlayer() {
-  // Шооны зургыг алга болгох
-  diceDom.style.display = "none";
-
-  // Нэг буусан тоглогчийн roundScore-ыг тэглэж байна
-  roundScore = 0;
-
-  // Нэг буусан тоглогчийн currentScore-ыг тэглэж байна
-  document.getElementById("current-" + activePlayer).textContent = 0;
-
-  // Идэвхитэй тоглогчийг сольж байна
-  activePlayer === 0 ? (activePlayer = 1) : (activePlayer = 0);
-
-  // Active Player-ын жижигхэн бөөрөнхийг шилжүүлэх
-  document.querySelector(".player-0-panel").classList.toggle("active");
-  document.querySelector(".player-1-panel").classList.toggle("active");
 }
